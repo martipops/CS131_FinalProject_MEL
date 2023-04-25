@@ -3,8 +3,8 @@ package com.martipops.beatthebird;
 import java.util.LinkedList;
 
 /**
- * BetLogic class extends LinkedList of BetSpot objects, accounting for the
- * betting logic of the game.
+ * BetLogic class extends LinkedList, representing the logic for the game's
+ * betting system.
  */
 public class BetLogic extends LinkedList<BetSpot> {
 
