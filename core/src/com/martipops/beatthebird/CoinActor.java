@@ -2,6 +2,7 @@ package com.martipops.beatthebird;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -15,26 +16,6 @@ public class CoinActor extends Image {
 	 * The value of the coin.
 	 */
 	public final int value;
-
-	/**
-	 * The texture region for the coin image.
-	 */
-	TextureRegion region = GameMain.coinTenRegion;
-
-	/**
-	 * Whether the coin is currently moving.
-	 */
-	boolean moving = false;
-
-	/**
-	 * The x coordinate of the coin's destination.
-	 */
-	float destX;
-
-	/**
-	 * The y coordinate of the coin's destination.
-	 */
-	float destY;
 
 	/**
 	 * Constructor for creating a CoinActor with a specified texture region and
@@ -72,9 +53,16 @@ public class CoinActor extends Image {
 	 * @param i The Inventory object to randomize the coin's coordinates within.
 	 */
 	public void randomizeCoords(Inventory i) {
-		this.setX(MathUtils.random(0, i.getWidth() / 2f));
-		this.setY(MathUtils.random(0, i.getHeight() / 2f));
-		this.setZIndex(0);
+		float[] coords = generateRandomCoords(i);
+		setX(coords[0]);
+		setY(coords[1]);
+	}
+
+	public float[] generateRandomCoords(Inventory i) {
+		float[] coords = new float[2];
+		coords[0] = MathUtils.random(0, i.getWidth() / 2f);
+		coords[1] = MathUtils.random(0, i.getHeight() / 2f);
+		return coords;
 	}
 
 	/**

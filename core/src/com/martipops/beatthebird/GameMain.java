@@ -13,12 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class GameMain extends ApplicationAdapter implements InputProcessor, GameInterface {
 
+	// Variables are static to make the objects globally accessable
+	public static WheelActor wheel;
+	public static Texture wheelTexture, coinTenTexture, numbersTexture, triangleTexture, backgroundTexture;
+	public static Inventory playerInventory;
+	public static BetSpot betSpotOne, betSpotThree, betSpotFive, betSpotTen, betSpotTwenty;
 	public static Stage stage;
-	private WheelActor wheel;
-	private Texture wheelTexture, coinTenTexture, numbersTexture, triangleTexture, backgroundTexture;
 	public static Actor touchActor;
-	private static Inventory playerInventory;
-	private static BetSpot betSpotOne, betSpotThree, betSpotFive, betSpotTen, betSpotTwenty;
 	public static TextureRegion wheelRegion, coinTenRegion, numbersRegion, triangleRegion, backgroundRegion;
 	public static Image triangleImage, numbersImage, backgroundImage;
 	public static BetLogic bets;
@@ -41,6 +42,29 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 		 */
 		InputMultiplexer multiplexer = new InputMultiplexer(stage, this);
 		Gdx.input.setInputProcessor(multiplexer);
+	}
+
+	/**
+	 * This method renders the stage by clearing the screen and drawing all actors
+	 * on the stage. Called for each frame.
+	 */
+	@Override
+	public void render() {
+		Gdx.gl.glClearColor(0, 0, 0, 1); // Set the color to clear the screen with
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+		stage.act(Gdx.graphics.getDeltaTime()); // Update all actors on the stage
+		stage.draw(); // Draw all actors on the stage
+	}
+
+	/**
+	 * Disposes textures from memory. Called on exit
+	 */
+	@Override
+	public void dispose() {
+		wheelTexture.dispose();
+		coinTenTexture.dispose();
+		numbersTexture.dispose();
+		stage.dispose();
 	}
 
 	/**
@@ -135,66 +159,33 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 		bets.clearBets();
 	}
 
-	/**
-	 * This method renders the stage by clearing the screen and drawing all actors
-	 * on the stage. Called for each frame.
-	 */
-	@Override
-	public void render() {
-		Gdx.gl.glClearColor(0, 0, 0, 1); // Set the color to clear the screen with
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
-		stage.act(Gdx.graphics.getDeltaTime()); // Update all actors on the stage
-		stage.draw(); // Draw all actors on the stage
-	}
-
-	/**
-	 * Disposes textures from memory. Called on exit
-	 */
-	@Override
-	public void dispose() {
-		wheelTexture.dispose();
-		coinTenTexture.dispose();
-		numbersTexture.dispose();
-		stage.dispose();
-	}
-
-	/**
-	 * Override from InputProcessor interface
-	 */
-	@Override
-	public boolean keyDown(int keycode) {
-		return false;
-	}
-
-	/**
-	 * Override from InputProcessor interface
-	 */
-	@Override
-	public boolean keyUp(int keycode) {
-		return false;
-	}
-
-	/**
-	 * Override from InputProcessor interface
-	 * Modified to allow for debugging
-	 */
-	@Override
-	public boolean keyTyped(char character) {
-		switch (character) {
-			case 'c':
-				playerInventory.setTotal(100);
-				super.render();
-				break;
-			case 'l':
-				System.out.println(Gdx.input.getX() + ", " + (Gdx.graphics.getHeight() - Gdx.input.getY()));
-				break;
-		}
-		return false;
-	}
-
 	public Actor touchHit() {
 		touchActor = stage.hit(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY(), false);
 		return touchActor;
+	}
+
+	/**
+	 * This method is used to register a bet by adding or subtracting coins from the
+	 * player's inventory. It checks if the wheel is currently spinning and if the
+	 * hit object is an instance of Inventory. If the hit object is the player's
+	 * inventory or the wheel is spinning, it returns false. Otherwise, it transfers
+	 * the specified amount of coins to the hit inventory using the transferCoin
+	 * method of the player's inventory.
+	 * 
+	 * @param amount the amount of coins to add or subtract from the hit inventory
+	 * @return true if the coin is transferred.
+	 */
+	public boolean registerBet(int amount) {
+		if (wheel.isSpinning())
+			return false;
+		Actor a = touchHit();
+		if (!(a instanceof Inventory))
+			return false;
+		Inventory i = ((Inventory) a);
+		if (i.getName().equals("player"))
+			return false;
+		playerInventory.transferCoin(i, amount);
+		return false;
 	}
 
 	/**
@@ -219,25 +210,7 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 	}
 
 	/**
-	 * resets the touchActor to null when a touch (click) is released
-	 */
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		touchActor = null;
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		return false;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
-	}
-
-	/**
+	 * Register bets when user scrolls while the cursor is over an inventory spot
 	 * 
 	 * @param amountX the amount of horizontal scrolling
 	 * @param amountY the amount of vertical scrolling
@@ -250,26 +223,61 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 	}
 
 	/**
-	 * This method is used to register a bet by adding or subtracting coins from the
-	 * player's inventory. It checks if the wheel is currently spinning and if the
-	 * hit object is an instance of Inventory. If the hit object is the player's
-	 * inventory or the wheel is spinning, it returns false. Otherwise, it transfers
-	 * the specified amount of coins to the hit inventory using the transferCoin
-	 * method of the player's inventory.
-	 * 
-	 * @param amount the amount of coins to add or subtract from the hit inventory
-	 * @return true if the coin is transferred.
+	 * Override from InputProcessor interface
+	 * Modified to allow for debugging
 	 */
-	public boolean registerBet(int amount) {
-		if (wheel.isSpinning())
-			return false;
-		Actor a = touchHit();
-		if (!(a instanceof Inventory))
-			return false;
-		Inventory i = ((Inventory) a);
-		if (i.getName().equals("player"))
-			return false;
-		playerInventory.transferCoin(i, amount);
+	@Override
+	public boolean keyTyped(char character) {
+		switch (character) {
+			case 'c':
+				playerInventory.setTotal(100);
+				super.render();
+				break;
+			case 'l':
+				System.out.println(Gdx.input.getX() + ", " + (Gdx.graphics.getHeight() - Gdx.input.getY()));
+				break;
+		}
+		return false;
+	}
+
+	/**
+	 * Resets the touchActor to null when a touch (click) is released
+	 */
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		touchActor = null;
+		return false;
+	}
+
+	/**
+	 * Override from InputProcessor interface
+	 */
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return false;
+	}
+
+	/**
+	 * Override from InputProcessor interface
+	 */
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return false;
+	}
+
+	/**
+	 * Override from InputProcessor interface
+	 */
+	@Override
+	public boolean keyDown(int keycode) {
+		return false;
+	}
+
+	/**
+	 * Override from InputProcessor interface
+	 */
+	@Override
+	public boolean keyUp(int keycode) {
 		return false;
 	}
 

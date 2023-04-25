@@ -13,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.Group;
  */
 public class Inventory extends Group {
 
+	/**
+	 * The font for displaying the total value of coins in the inventory.
+	 */
 	private BitmapFont font;
 
 	/**

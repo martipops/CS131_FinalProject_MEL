@@ -18,7 +18,6 @@ public class BetLogic extends LinkedList<BetSpot> {
         int amtWon = 0;
         for (BetSpot t : this)
             amtWon += t.getWinnings(spot);
-        System.out.println("won " + amtWon);
         GameMain.ui.showPopUp("Won " + amtWon + " Diamonds!");
         return amtWon;
     }
