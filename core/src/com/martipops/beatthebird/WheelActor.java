@@ -111,16 +111,26 @@ public class WheelActor extends CircleActor implements GameInterface {
 
 	/**
 	 * This is called when a player clicks the wheel. It allows for the animation
-	 * process of the wheel to begin
+	 * process of the wheel to begin with a specified speed.
+	 * 
+	 * @param rotationSpeed the speed at which the wheel should spin
 	 */
-	public void spin() {
-		int rspeed = MathUtils.random(500, 1000);
+	public void spin(int rotationSpeed) {
 		if (!spinning) {
 			// The wheel is not already spinning, so start spinning it
 			spinning = true;
-			rotationSpeed = rspeed;
+			this.rotationSpeed = rotationSpeed;
 			slowdownFactor = 0.99f;
 		}
+	}
+
+	/**
+	 * This is called when a player clicks the wheel. It allows for the animation
+	 * process of the wheel to begin with a random speed.
+	 */
+	public void spin() {
+		int rspeed = MathUtils.random(500, 1000);
+		spin(rspeed);
 	}
 
 	/**

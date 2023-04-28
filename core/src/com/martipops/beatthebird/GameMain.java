@@ -190,11 +190,10 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 
 	/**
 	 * 
-	 * This method is called when the user touches (clicks) the screen. It hits the
-	 * stage at the touch coordinates to detect if an object is clicked. If an actor
-	 * is hit, touchActor is set to that actor. If no actor is hit, touchActor is
-	 * set to null.
-	 * Calls registerBet() based on right or left click
+	 * Description: This method is used to register a bet by adding or subtracting
+	 * coins from the player's inventory. It checks if the wheel is currently
+	 * spinning and if the hit object is an instance of Inventory. Right clicking
+	 * will subtract coins and left clicking will add coins.
 	 * 
 	 * @param screenX the x-coordinate of the touch on the screen
 	 * @param screenY the y-coordinate of the touch on the screen
@@ -205,7 +204,10 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		touchHit();
-		registerBet(button * 2 - 1); // -1 if right click, 1 if left
+		if (button == 0)
+			registerBet(-1);
+		else if (button == 1)
+			registerBet(1);
 		return false;
 	}
 
@@ -225,6 +227,9 @@ public class GameMain extends ApplicationAdapter implements InputProcessor, Game
 	/**
 	 * Override from InputProcessor interface
 	 * Modified to allow for debugging
+	 * 
+	 * @param keycode the keycode for the key pressed
+	 * @return always returns false
 	 */
 	@Override
 	public boolean keyTyped(char character) {
